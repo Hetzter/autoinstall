@@ -1,0 +1,74 @@
+#cloud-config
+autoinstall:
+  version: 1
+  storage:
+    swap:
+      size: 0
+    layout:
+      name: lvm
+      sizing-policy: all
+  source:
+    search_drivers: true
+    id: ubuntu-server-minimal
+  network:
+    ethernets:
+      enp1s0:
+        dhcp4: true
+        dhcp6: true
+    version: 2
+  oem:
+    install: false
+  codecs:
+    install: false
+  drivers:
+    install: true
+  keyboard:
+    layout: us
+    variant: intl
+  locale: en_US.UTF-8
+  updates: all
+  shutdown: reboot
+  packages:
+    - vim
+    - git
+    - tmux
+    - nano
+
+  ssh:
+    allow-pw: false
+    install-server: true
+
+
+  user-data:
+    disable_root: true
+    timezone: Europe/Vienna
+    package_upgrade: false
+    users:
+      - name: ubuntu
+        gecos: Default
+        passwd: $6$pKNepoJrO6lUgl9/$ejlDAry.6Q6.WjQ1qWfjbqNt7DMH3cd2RSHlYi/Qn0gCK/ybuNTe7e8J8e48bjjQ9sDMeBcZXrqwBQRFvVMRi1
+        shell: /bin/bash
+        groups: adm, cdrom, dip, lxd, plugdev, sudo
+        lock_passwd: false
+        ssh_authorized_keys:
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO4jRlbHJANEuE/ljnIKq4vaE4QAd5+qzZgWvfFX8ozN max@MaxArch
+        sudo: ALL=(ALL) NOPASSWD:ALL
+      - name: ansible
+        gecos: Ansible User
+        groups: users,admin,wheel
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        shell: /bin/bash
+        lock_passwd: true
+        ssh_authorized_keys:
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO4jRlbHJANEuE/ljnIKq4vaE4QAd5+qzZgWvfFX8ozN max@MaxArch
+
+
+
+
+  late-commands:
+    - sudo bash -c "echo 'server-$(openssl rand -hex 2)' > /target/etc/hostname"
+    - sudo bash -c "echo 'Host   - $(cat /target/etc/hostname)' > /target/etc/issue"
+    - sudo bash -c "echo 'Kernel - $(uname -sr)' >> /target/etc/issue"
+    - sudo bash -c "echo 'IP     - $(hostname -I)' >> /target/etc/issue"
+    - sudo bash -c "echo '' >> /target/etc/issue"
+
